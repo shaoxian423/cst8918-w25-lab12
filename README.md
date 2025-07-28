@@ -80,7 +80,6 @@ output "container_name" {
   value = azurerm_storage_container.tfstate.name
 }
 
-# 可选：仅本地测试需要
 output "arm_access_key" {
   value     = azurerm_storage_account.sa.primary_access_key
   sensitive = true
@@ -235,3 +234,121 @@ az ad app federated-credential create \
 az ad app federated-credential create \
   --id $appIdR \
   --parameters az-federated-credential-params/branch-main.json
+  ![alt text](image-19.png)
+# Verify
+az ad app federated-credential list --id $appIdRW --query "[].name" -o tsv
+az ad app federated-credential list --id $appIdR --query "[].name" -o tsv
+![alt text](image-20.png)
+
+**4. GitHub Secrets.md**
+# Settings > Secrets and variables > Actions > New repository secret
+![alt text](image-21.png)
+# Settings > Environments > New environment
+![alt text](image-22.png)
+# verify
+![alt text](image-23.png)
+
+# Test GitHub Actions workflow
+# infra-static-tests.yml
+name: Terraform Static Tests
+
+on: [push]
+
+jobs:
+  static-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: hashicorp/setup-terraform@v2
+      - run: terraform -chdir=infra/tf-app init -backend=false
+      - run: terraform -chdir=infra/tf-app fmt -check
+      - run: terraform -chdir=infra/tf-app validate
+      - uses: terraform-linters/setup-tflint@v3
+      - run: tflint -chdir=infra/tf-app
+# infra-ci-cd.yml
+name: Terraform CI/CD
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  plan:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v3
+      - uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - uses: hashicorp/setup-terraform@v2
+      - run: terraform -chdir=infra/tf-app init
+      - run: terraform -chdir=infra/tf-app plan -out=plan.tfplan
+      - name: Comment Terraform Plan
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const plan = await require('child_process').execSync('terraform -chdir=infra/tf-app show -no-color plan.tfplan').toString();
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `Terraform Plan:\n\`\`\`\n${plan}\n\`\`\``
+            });
+
+  apply:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v3
+      - uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - uses: hashicorp/setup-terraform@v2
+      - run: terraform -chdir=infra/tf-app init
+      - run: terraform -chdir=infra/tf-app apply -auto-approve
+# infra-drift-detection.yml
+name: Terraform Drift Detection
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Daily
+
+jobs:
+  drift:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v3
+      - uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - uses: hashicorp/setup-terraform@v2
+      - run: terraform -chdir=infra/tf-app init
+      - run: terraform -chdir=infra/tf-app plan -detailed-exitcode
+        continue-on-error: true
+#  push code：
+(base) shaoxianduan@DuanM4 cst8918-w25-lab12 % git add .
+git commit -m "Remove .tfstate files from history and update workflows"
+git push origin main --force
+![alt text](image-25.png)
+
+
