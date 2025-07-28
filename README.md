@@ -359,8 +359,6 @@ git push origin dev
 
 # CST8918-W25-Lab12
 ## Team Members
-# CST8918-W25-Lab12
-## Team Members
 - Shaoxian Duan (GitHub: shaoxian423)
 - [Xihai Ren] (GitHub: ...)
 - Mishravaibhav0032 (GitHub: ...)
