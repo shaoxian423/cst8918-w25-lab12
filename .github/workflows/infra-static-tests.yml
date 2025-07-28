@@ -1,0 +1,15 @@
+name: Terraform Static Tests
+
+on: [push]
+
+jobs:
+  static-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: hashicorp/setup-terraform@v2
+      - run: terraform -chdir=infra/tf-app init -backend=false
+      - run: terraform -chdir=infra/tf-app fmt -check
+      - run: terraform -chdir=infra/tf-app validate
+      - uses: terraform-linters/setup-tflint@v3
+      - run: tflint -chdir=infra/tf-app
