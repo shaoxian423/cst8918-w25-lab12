@@ -11,7 +11,6 @@ terraform {
 
 provider "azurerm" {
   features {}
-  use_oidc = true # 启用 OIDC 认证，支持 GitHub Actions
 }
 
 resource "azurerm_resource_group" "rg" {
@@ -20,7 +19,7 @@ resource "azurerm_resource_group" "rg" {
 }
 
 resource "azurerm_storage_account" "sa" {
-  name                     = "duan0027githubactions25" # 新名称，确保唯一
+  name                     = "duan0027githubactions25"
   resource_group_name      = azurerm_resource_group.rg.name
   location                 = azurerm_resource_group.rg.location
   account_tier             = "Standard"
@@ -30,7 +29,7 @@ resource "azurerm_storage_account" "sa" {
 
 resource "azurerm_storage_container" "tfstate" {
   name                  = "tfstate"
-  storage_account_name  = azurerm_storage_account.sa.name
+  storage_account_name  = azurerm_storage_account.sa.name 
   container_access_type = "private"
 }
 
@@ -46,7 +45,7 @@ output "container_name" {
   value = azurerm_storage_container.tfstate.name
 }
 
-# 可选：仅本地测试需要
+
 output "arm_access_key" {
   value     = azurerm_storage_account.sa.primary_access_key
   sensitive = true

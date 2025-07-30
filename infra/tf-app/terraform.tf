@@ -1,5 +1,6 @@
 terraform {
-  required_version = "~> 1.5"  # update
+
+  required_version = ">= 1.1.0"
 
   required_providers {
     azurerm = {
@@ -13,11 +14,11 @@ terraform {
     storage_account_name = "duan0027githubactions25"
     container_name       = "tfstate"
     key                  = "prod.app.tfstate"
-    use_oidc             = true  # add
+    use_oidc             = true
   }
 }
 
 provider "azurerm" {
   features {}
-  use_oidc = true  # add
+  use_oidc = true
 }
