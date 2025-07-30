@@ -550,6 +550,8 @@ git push origin main
 
 ![Terraform CI/CD](./screenshots/CICD.png)
 
+### 6.3 Terraform Drift Workflow
+![alt text](image.png)
 ---
 
 ## Project Structure
