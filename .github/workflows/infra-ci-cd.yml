@@ -150,4 +150,4 @@ jobs:
         path: infra/tf-app
     - name: Terraform Apply
       working-directory: infra/tf-app
-      run: terraform apply -auto-approve tfplan
+      run: terraform apply -auto-approve 
