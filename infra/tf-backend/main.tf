@@ -1,4 +1,6 @@
 terraform {
+
+  required_version = ">= 1.1.0"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
@@ -6,7 +8,7 @@ terraform {
     }
   }
 
-  required_version = ">= 1.1.0"
+
 }
 
 provider "azurerm" {
@@ -29,7 +31,7 @@ resource "azurerm_storage_account" "sa" {
 
 resource "azurerm_storage_container" "tfstate" {
   name                  = "tfstate"
-  storage_account_name  = azurerm_storage_account.sa.name 
+  storage_account_name  = azurerm_storage_account.sa.name
   container_access_type = "private"
 }
 
