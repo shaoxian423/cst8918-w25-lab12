@@ -356,6 +356,8 @@ git push origin dev
 ![alt text](image-26.png)
 # Pull Request
 ![alt text](image-27.png)
+# git push origin main
+![alt text](image.png)
 
 # CST8918-W25-Lab12
 ## Team Members
