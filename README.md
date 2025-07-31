@@ -350,5 +350,3 @@ jobs:
 git commit -m "Remove .tfstate files from history and update workflows"
 git push origin main --force
 ![alt text](image-25.png)
-
-
